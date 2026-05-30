@@ -30,11 +30,13 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:PutObject
+              - Effect: Deny
+                Action: [s3:GetObject, s3:PutObject]
                 Resource: !Sub 'arn:aws:s3:::${Envname}-${BucketName}/*'
+                # Ecrire dans la la base de données DynamoDB
+              - Effect: Allow
+                Action: [dynamodb:PutItem, dynamodb:GetItem]
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${Envname}-DynamoDBTable'
 # Fonction lambda pour gerer les event S3
   LambdaTrigger:
     Type: AWS::Lambda::Function
