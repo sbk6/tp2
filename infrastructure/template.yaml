@@ -41,7 +41,7 @@ Resources:
                     dynamodb:PutItem,
                     dynamodb:GetItem
                 ]
-                Resoure:
+                Resource: 'arn:aws:dynamodb:*:*:table/s3-trigger-db'
 
   # Fonction Lambda
   LambdaTigger:
