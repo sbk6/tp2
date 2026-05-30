@@ -11,7 +11,7 @@ parameters:
     Default: "s3-bucket-trigger-lambda"
 
 Resources: 
-## IAM Role pour la lambda
+## IAM Role pour la fonction lambda
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -42,16 +42,15 @@ Resources:
       FunctionName: !Sub '${Envname}-${BucketName}'
       Handler: main.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
-      Runtime: python3.8
-      code : ../src
+      Runtime: python3.12
+      Code : ../src
  
 # s3 bucket pour le stocker les fichiers
   S3Bucket:
     Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
     Properties:
       BucketName: !Sub '${Envname}-${BucketName}'
       NotificationConfiguration:
         LambdaConfigurations:
-          - Event: 's3:ObjectCreated:*'
+          - Event: s3:ObjectCreated:*
             Function: !GetAtt LambdaTrigger.Arn
