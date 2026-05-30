@@ -7,8 +7,8 @@ Parameters:
     Default: sbikozi
   BucketName:
     Type: String
-    Description: S3 bucket name (e.g. votre identifiant sans le learnaws + -bucket
-      pour différencier du bucket de votre voisin)
+    Description: S3 bucket name (e.g. votre identifiant sans le learnaws + 
+      -bucket pour différencier du bucket de votre voisin)
     Default: s3-bucket-trigger-lambda
 Resources:
   LambdaExecutionRole:
@@ -17,51 +17,122 @@ Resources:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - sts:AssumeRole
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
-        - PolicyName: LambdaS3AccessPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Deny
-                Action:
-                  - s3:GetObject
-                  - s3:PutObject
-                Resource: !Sub arn:aws:s3:::${Environment}-${BucketName}/*
-              - Effect: Allow
-                Action:
-                  - dynamodb:PutItem
-                  - dynamodb:GetItem
-                Resource: arn:aws:dynamodb:*:*:table/s3-trigger-db
+      - PolicyName: LambdaS3AccessPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Deny
+            Action:
+            - s3:GetObject
+            - s3:PutObject
+            Resource:
+              Fn::Sub: arn:aws:s3:::${Environment}-${BucketName}/*
+          - Effect: Allow
+            Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            Resource: arn:aws:dynamodb:*:*:table/s3-trigger-db
   LambdaTigger:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub ${Environment}-lambda-trigger
+      FunctionName:
+        Fn::Sub: ${Environment}-lambda-trigger
       Handler: main.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
       Runtime: python3.12
       Code:
         S3Bucket: iabd-sourcecode-management-bucket
-        S3Key: 5f7bef20ccbc0e7ac95e40ca0e4d2771
+        S3Key: fe5c33e97c6ffd9d9ed0212d6cea7bb9
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: s3-trigger-db
+          LEARNER_IDENTIFIER:
+            Fn::Sub: ${Environment}
   LambdaPermissionsForS3:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !Ref LambdaTigger
+      FunctionName:
+        Ref: LambdaTigger
       Action: lambda:InvokeFunction
       Principal: s3.amazonaws.com
-      SourceArn: !Sub arn:aws:s3:::${Environment}-${BucketName}
+      SourceArn:
+        Fn::Sub: arn:aws:s3:::${Environment}-${BucketName}
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${Environment}-${BucketName}
+      BucketName:
+        Fn::Sub: ${Environment}-${BucketName}
       NotificationConfiguration:
         LambdaConfigurations:
-          - Event: s3:ObjectCreated:*
-            Function: !GetAtt LambdaTigger.Arn
+        - Event: s3:ObjectCreated:*
+          Filter:
+            S3Key:
+              Rules:
+              - Name: suffix
+                Value: .jpg
+          Function:
+            Fn::GetAtt:
+            - LambdaTigger
+            - Arn
+        - Event: s3:ObjectCreated:*
+          Filter:
+            S3Key:
+              Rules:
+              - Name: suffix
+                Value: .jpeg
+          Function:
+            Fn::GetAtt:
+            - LambdaTigger
+            - Arn
+        - Event: s3:ObjectCreated:*
+          Filter:
+            S3Key:
+              Rules:
+              - Name: suffix
+                Value: .png
+          Function:
+            Fn::GetAtt:
+            - LambdaTigger
+            - Arn
+        - Event: s3:ObjectCreated:*
+          Filter:
+            S3Key:
+              Rules:
+              - Name: suffix
+                Value: .gif
+          Function:
+            Fn::GetAtt:
+            - LambdaTigger
+            - Arn
+        - Event: s3:ObjectCreated:*
+          Filter:
+            S3Key:
+              Rules:
+              - Name: suffix
+                Value: .bmp
+          Function:
+            Fn::GetAtt:
+            - LambdaTigger
+            - Arn
+        - Event: s3:ObjectCreated:*
+          Filter:
+            S3Key:
+              Rules:
+              - Name: suffix
+                Value: .webp
+          Function:
+            Fn::GetAtt:
+            - LambdaTigger
+            - Arn
