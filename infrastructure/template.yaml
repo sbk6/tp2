@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2012-10-17'
+AWSTemplateFormatVersion: '2010-09-09'
 Description: 'TP AWS Lambda - Code charge depuis src/main.py'
 
 Parameters:
@@ -53,12 +53,20 @@ Resources:
       Runtime: python3.12
       Code: ../src
 
-  # S3 bucket pour stocker les fichier 
+  LambdaPermissionsForS3:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaTigger
+      Action: 'lambda:InvokeFunction'
+      Principal: 's3.amazonaws.com'
+      SourceArn: !Sub 'arn:aws:s3:::${Environment}-${BucketName}'
+
+  # S3 bucket pour stocker les fichier
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !sub '${Environment}-${BucketName}'
+      BucketName: !Sub '${Environment}-${BucketName}'
       NotificationConfiguration:
         LambdaConfigurations:
           - Event: 's3:ObjectCreated:*'
-            Function: !GetAtt LambdaFunction.Arn
+            Function: !GetAtt LambdaTigger.Arn

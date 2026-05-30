@@ -1,0 +1,4 @@
+﻿AWSTemplateFormatVersion: '2012-10-17'
+Resources:
+  TestBucket:
+    Type: AWS::S3::Bucket
