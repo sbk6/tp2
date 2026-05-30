@@ -4,7 +4,7 @@ parameters:
   Envname:
     Type: String
     description: 'Environment name (e.g votre identifiant sans learning)'
-    Default: 'learnaws_sbikozi'
+    Default: 'sbikozi'
   BucketName:
     Type: String
     Description: "S3 bucket name (e.g votre identifiant sans learning)"
